@@ -14,7 +14,6 @@
 const static float PI = 3.1415926535f;
 float fStepScale = 1.0f;
 
-
 bool IsMoveHack( ) /* Is player already using one movement hack? */
 {
 	for( int i = 0; i < ( sizeof( moveHacks_t.status ) / sizeof( bool ) ); i++ ) {
@@ -143,6 +142,18 @@ void UpdatePlayerPos() /* Called in loop to Read in Player Coords */
 
 int main( )
 {
+	
+	const int directx = MessageBox( NULL, "Is DirectX 11 on?", "DirectX", MB_YESNO ); // TODO detect directx11 automatically 
+
+	switch( directx ) {
+	case IDYES:
+		x64 = true;
+		break;
+	case IDNO:
+		x64 = false;
+		break;
+	}
+	
 	std::atomic<bool> run(true);
 	std::thread cinThread( ReadCin, std::ref(run));
 

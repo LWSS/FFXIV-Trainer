@@ -33,13 +33,17 @@ HANDLE hFF;
 // 11/12/16 -- { 0x01D645F0, 0xA0 };
 // 1/12/17 -- { 0x013B5E40, 0xA0 };
 
-static const std::vector<int> xBase = { 0x01E25E40, 0xA0 };
-static const std::vector<int> yBase = { 0x01E25E40, 0xA4 };
-static const std::vector<int> zBase = { 0x01E25E40, 0xA8 };
-static const std::vector<int> xCamBase = { 0x01E25E40, 0xEC, 0x30 };
-static const std::vector<int> yCamBase = { 0x01E25E40, 0xEC, 0x34 };
-static const std::vector<int> zCamBase = { 0x01E25E40, 0xEC, 0x38 };
-static const std::vector<int> hBase = { 0x01E25E40, 0xB0 }; // ;/0xB0 }; // Heading in Radians
+static const unsigned long long startingAddr = 0x7FF7130CEB68L;
+static bool x64;
+
+static std::vector<unsigned long long> xBase;
+static std::vector<unsigned long long> yBase;
+static std::vector<unsigned long long> zBase;
+static std::vector<unsigned long long> xCamBase;
+static std::vector<unsigned long long> yCamBase;
+static std::vector<unsigned long long> zCamBase;
+static std::vector<unsigned long long> hBase; // ;/0xB0 }; // Heading in Radians
+
 LPVOID xAddr;
 LPVOID yAddr;
 LPVOID zAddr;
@@ -52,18 +56,39 @@ struct vec3 {
 	float x, y, z, h;
 } playerPos_t, playerCamPos_t, noClipBuffer_t = { 0, 0, 0 }, noClipCurrant_t, flyBuffer_t = { 0, 0, 0 }, flyCurrent_t = { 0, 0, 0 };
 
-LPVOID TraceBasePointer(std::vector<int> Base)
+LPVOID TraceBasePointer(std::vector<unsigned long long> Base)
 {
-	int iBaseAddr = Base[0]; // First Element in Base Vector is Base Addr
+	unsigned long long lBaseAddr = Base[0]; // First Element in Base Vector is Base Addr
 	for (unsigned int i = 1; i < Base.size(); i++) { // Rest are Offsets
-		ReadProcessMemory(hFF, (LPVOID)iBaseAddr, &iBaseAddr, 4, NULL);
-		iBaseAddr += Base[i];
+		if( x64 ){
+			ReadProcessMemory( hFF, ( LPVOID )lBaseAddr, &lBaseAddr, 8, NULL );
+		} else {
+			ReadProcessMemory( hFF, ( LPVOID )lBaseAddr, &lBaseAddr, 4, NULL );
+		}
+		lBaseAddr += Base[i];
 	}
-	return (LPVOID)iBaseAddr;
+	return (LPVOID)lBaseAddr;
 }
 
 void SetupAddress()
 {
+	if( x64 ){
+		xBase = { startingAddr, 0xB0 };
+		yBase = { startingAddr, 0xB4 };
+		zBase = { startingAddr, 0xB8 };
+		xCamBase = { startingAddr, 0xFC, 0x40 };
+		yCamBase = { startingAddr, 0xFC, 0x44 };
+		zCamBase = { startingAddr, 0xFC, 0x48 };
+		hBase = { startingAddr, 0xC0 };
+	} else {
+		xBase = { startingAddr, 0xA0 };
+		yBase = { startingAddr, 0xA4 };
+		zBase = { startingAddr, 0xA8 };
+	    xCamBase = { startingAddr, 0xEC, 0x30 };
+		yCamBase = { startingAddr, 0xEC, 0x34 };
+		zCamBase = { startingAddr, 0xEC, 0x38 };
+		hBase = { startingAddr, 0xB0 }; 
+	}
 	xAddr = TraceBasePointer(xBase);
 	yAddr = TraceBasePointer(yBase);
 	zAddr = TraceBasePointer(zBase);
