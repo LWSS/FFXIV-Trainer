@@ -113,8 +113,8 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="HackThreads.h" />
-    <ClInclude Include="Memory.h" />
+    <ClInclude Include="HackThreads.hpp" />
+    <ClInclude Include="Memory.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

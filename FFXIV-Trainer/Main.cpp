@@ -7,11 +7,12 @@
 #include <vector>
 #include <math.h>
 
-#include "Memory.h"
-#include "HackThreads.h"
+#include "Memory.hpp"
+#include "HackThreads.hpp"
 
 
-const static float PI = 3.1415926535f;
+const static float PI = 3.141592f;
+const static float PI_HALF = 1.570796;
 float fStepScale = 1.0f;
 
 bool IsMoveHack( ) /* Is player already using one movement hack? */
@@ -170,7 +171,6 @@ int main( )
 	DWORD PID;
 	GetWindowThreadProcessId( hWnd, &PID );
 	hFF = OpenProcess( PROCESS_ALL_ACCESS, false, PID );
-	
 		
 	if ( !hFF ){
 		std::cout<< "Cannot Access Process Memory"<<std::endl;
@@ -194,8 +194,7 @@ int main( )
 				std::cout<< "*X: " << playerPos_t.x << "  Y: " << playerPos_t.y << "  Z: " << playerPos_t.z << "  Head: " << playerPos_t.h;
 				std::cout<< "\r" << std::flush;
 			}
-
-			#pragma region noClip
+#pragma region noClip
 			if ( moveHacks_t.status.bNoClip || moveHacks_t.status.bGhostClip ) {
 				if (GetAsyncKeyState(VK_NUMPAD4)){ // Left
 					mNoClip.lock();
@@ -235,32 +234,49 @@ int main( )
 					mNoClip.unlock();
 				}
 			}
-			#pragma endregion
+#pragma endregion
+
+#pragma region fly
 			if ( moveHacks_t.status.bFly ) {
 				if (GetAsyncKeyState(VK_NUMPAD4)){ // Left
 					mFly.lock();
-						flyBuffer_t.x = playerPos_t.x + ( sin( playerPos_t.h + PI/2 ) * fStepScale );
+						flyBuffer_t.x = playerPos_t.x + ( sin( playerPos_t.h + PI_HALF ) * fStepScale );
 						flyBuffer_t.y = playerPos_t.y;
-						flyBuffer_t.z = playerPos_t.z + ( cos( playerPos_t.h + PI/2 ) * fStepScale );
+						flyBuffer_t.z = playerPos_t.z + ( cos( playerPos_t.h + PI_HALF ) * fStepScale );
 					mFly.unlock();
 				} else if (GetAsyncKeyState(VK_NUMPAD6)){ // Right
 					mFly.lock();
-						flyBuffer_t.x = playerPos_t.x + ( sin( playerPos_t.h - PI/2 ) * fStepScale );
+						flyBuffer_t.x = playerPos_t.x + ( sin( playerPos_t.h - PI_HALF ) * fStepScale );
 						flyBuffer_t.y = playerPos_t.y;
-						flyBuffer_t.z = playerPos_t.z + ( cos( playerPos_t.h - PI/2 ) * fStepScale );
+						flyBuffer_t.z = playerPos_t.z + ( cos( playerPos_t.h - PI_HALF ) * fStepScale );
 					mFly.unlock();
 				} else if (GetAsyncKeyState(VK_NUMPAD8)){ // Forward
-
+					mFly.lock();
+					flyBuffer_t.x = playerPos_t.x + ( sin(playerPos_t.h) * fStepScale);
+					flyBuffer_t.y = playerPos_t.y;
+					flyBuffer_t.z = playerPos_t.z + ( cos(playerPos_t.h) * fStepScale);
+					mFly.unlock();
 				} else if (GetAsyncKeyState(VK_NUMPAD5)){ // Back
-					
+					mFly.lock();
+					flyBuffer_t.x = playerPos_t.x - ( sin( playerPos_t.h ) * fStepScale );
+					flyBuffer_t.y = playerPos_t.y;
+					flyBuffer_t.z = playerPos_t.z - ( cos( playerPos_t.h ) * fStepScale );
+					mFly.unlock();
 				} else if (GetAsyncKeyState(VK_NUMPAD1)){ // Up
-					
+					mFly.lock();
+					flyBuffer_t.x = playerPos_t.x;
+					flyBuffer_t.y = playerPos_t.y + fStepScale;
+					flyBuffer_t.z = playerPos_t.z;
+					mFly.unlock();
 				} else if (GetAsyncKeyState(VK_NUMPAD0)){ // Down
-					
+					mFly.lock();
+					flyBuffer_t.x = playerPos_t.x;
+					flyBuffer_t.y = playerPos_t.y - fStepScale;
+					flyBuffer_t.z = playerPos_t.z;
+					mFly.unlock();
 				}
 			}
-
-
+#pragma endregion
 		}
 		Sleep(75);
 	}

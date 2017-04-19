@@ -20,10 +20,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="HackThreads.h">
+    <ClInclude Include="Memory.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Memory.h">
+    <ClInclude Include="HackThreads.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
