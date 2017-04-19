@@ -3,7 +3,7 @@
 #define HACKTHREADS_H
 
 std::mutex mNoClip, mFly;
-std::thread noClipThread, noFallThread, flyThread, ghostClipThread;
+std::thread noClipThread, ghostClipThread, noFallThread, flyThread, ghostFlyThread;
 
 
 void MaintainNoClip()
@@ -99,6 +99,10 @@ void MaintainFlight()
 			WriteProcessMemory(hFF, yAddr, &flyBuffer_t.y, 4, NULL);
 			WriteProcessMemory(hFF, zAddr, &flyBuffer_t.z, 4, NULL);
 
+			WriteProcessMemory(hFF, xCamAddr, &flyBuffer_t.x, 4, NULL);
+			WriteProcessMemory(hFF, yCamAddr, &flyBuffer_t.y, 4, NULL);
+			WriteProcessMemory(hFF, zCamAddr, &flyBuffer_t.z, 4, NULL);
+
 			flyBuffer_t.x = 0;
 			flyBuffer_t.y = 0;
 			flyBuffer_t.z = 0;
@@ -107,6 +111,33 @@ void MaintainFlight()
 			WriteProcessMemory(hFF, xAddr, &flyCurrent_t.x, 4, NULL);
 			WriteProcessMemory(hFF, yAddr, &flyCurrent_t.y, 4, NULL);
 			WriteProcessMemory(hFF, zAddr, &flyCurrent_t.z, 4, NULL);
+		}
+		mFly.unlock();
+	}
+}
+
+void MaintainGhostFlight()
+{
+	while( moveHacks_t.status.bGhostFly ) {
+		mFly.lock();
+		if( flyBuffer_t.x != 0 || flyBuffer_t.y != 0 || flyBuffer_t.z != 0 ) {
+
+			flyCurrent_t.x = flyBuffer_t.x;
+			flyCurrent_t.y = flyBuffer_t.y;
+			flyCurrent_t.z = flyBuffer_t.z;
+
+
+			WriteProcessMemory( hFF, xAddr, &flyBuffer_t.x, 4, NULL );
+			WriteProcessMemory( hFF, yAddr, &flyBuffer_t.y, 4, NULL );
+			WriteProcessMemory( hFF, zAddr, &flyBuffer_t.z, 4, NULL );
+
+			flyBuffer_t.x = 0;
+			flyBuffer_t.y = 0;
+			flyBuffer_t.z = 0;
+		} else {
+			WriteProcessMemory( hFF, xAddr, &flyCurrent_t.x, 4, NULL );
+			WriteProcessMemory( hFF, yAddr, &flyCurrent_t.y, 4, NULL );
+			WriteProcessMemory( hFF, zAddr, &flyCurrent_t.z, 4, NULL );
 		}
 		mFly.unlock();
 	}

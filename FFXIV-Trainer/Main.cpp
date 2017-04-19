@@ -56,7 +56,7 @@ void ReadCin(std::atomic<bool>& run)
 			std::cin >> zTo;
 
 			std::cout<< "X: " << xTo <<" Y: " << yTo << " Z: " << zTo << std::endl;
-		} else if ( buffer == "noclip" ){
+		} else if ( buffer == "noclip" || buffer == "nc" ){
 			if( moveHacks_t.status.bNoClip ){
 				std::cout<<"Noclip[OFF] - "<<std::endl;
 				moveHacks_t.status.bNoClip = false;
@@ -73,7 +73,7 @@ void ReadCin(std::atomic<bool>& run)
 					std::cout<< "You Must turn off Other Movement Hacks first" << std::endl;
 				}
 			}
-		} else if (buffer == "ghostclip") { /* No clip, don't set player's position until space is pressed in-game. */
+		} else if ( buffer == "ghostclip" || buffer == "gc" ) { /* No clip, don't set player's position until space is pressed in-game. */
 			if (moveHacks_t.status.bGhostClip) {
 				std::cout << "GhostClip[OFF] - " << std::endl;
 				moveHacks_t.status.bGhostClip = false;
@@ -94,7 +94,7 @@ void ReadCin(std::atomic<bool>& run)
 		} else if ( buffer == "step" ){
 			std::cin >> fStepScale;
 			std::cout<< "Step => " << fStepScale << std::endl;
-		} else if ( buffer == "nofall"){
+		} else if ( buffer == "nofall" || buffer == "nf" ){
 			if( moveHacks_t.status.bNoFall ){
 				std::cout<<"NoFall[OFF] - "<<std::endl;
 				moveHacks_t.status.bNoFall = false;
@@ -108,9 +108,9 @@ void ReadCin(std::atomic<bool>& run)
 					std::cout<< "You Must turn off Other Movement Hacks first" << std::endl;
 				}
 			}
-		} else if( buffer == "fly" ){
+		} else if( buffer == "fly" || buffer == "f" ){
 			if( moveHacks_t.status.bFly ){
-				std::cout<<"Fly[OFF] - "<<std::endl;
+				std::cout<<"Fly[OFF]"<<std::endl;
 				moveHacks_t.status.bFly = false;
 				flyThread.join();
 			} else {
@@ -123,6 +123,23 @@ void ReadCin(std::atomic<bool>& run)
 					flyThread = std::thread(MaintainFlight);
 				} else {
 					std::cout<< "You Must turn off Other Movement Hacks first" << std::endl;
+				}
+			}
+		} else if( buffer == "ghostfly" || buffer == "gf" ){ // tfw no gf
+			if( moveHacks_t.status.bGhostFly ){
+				std::cout<<"GhostFly[OFF]" <<std::endl;
+				moveHacks_t.status.bGhostFly = false;
+				ghostFlyThread.join();
+			} else {
+				if( !IsMoveHack() ){
+					std::cout<<"GhostFly[ON]"<<std::endl;
+					flyCurrent_t.x = playerPos_t.x; // Set Initial Values for Position Locking.
+					flyCurrent_t.y = playerPos_t.y;
+					flyCurrent_t.z = playerPos_t.z;
+					moveHacks_t.status.bGhostFly = true;
+					ghostFlyThread = std::thread(MaintainGhostFlight);
+				} else {
+					std::cout << "You Must turn off Other Movement Hacks first" << std::endl;
 				}
 			}
 		}
@@ -194,7 +211,7 @@ int main( )
 				std::cout<< "*X: " << playerPos_t.x << "  Y: " << playerPos_t.y << "  Z: " << playerPos_t.z << "  Head: " << playerPos_t.h;
 				std::cout<< "\r" << std::flush;
 			}
-#pragma region noClip
+#pragma region NOCLIP_INPUT
 			if ( moveHacks_t.status.bNoClip || moveHacks_t.status.bGhostClip ) {
 				if (GetAsyncKeyState(VK_NUMPAD4)){ // Left
 					mNoClip.lock();
@@ -236,8 +253,8 @@ int main( )
 			}
 #pragma endregion
 
-#pragma region fly
-			if ( moveHacks_t.status.bFly ) {
+#pragma region FLY_INPUT
+			if ( moveHacks_t.status.bFly || moveHacks_t.status.bGhostFly ) {
 				if (GetAsyncKeyState(VK_NUMPAD4)){ // Left
 					mFly.lock();
 						flyBuffer_t.x = playerPos_t.x + ( sin( playerPos_t.h + PI_HALF ) * fStepScale );

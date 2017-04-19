@@ -6,9 +6,9 @@ union
 {
 	struct
 	{
-		bool bNoClip, bGhostClip, bNoFall, bFly; // boolean default = FALSE
+		bool bNoClip, bGhostClip, bNoFall, bFly, bGhostFly; // boolean default = FALSE
 	} status;
-	bool iterate[4];
+	bool iterate[5];
 } moveHacks_t;
 
 HANDLE hFF;
