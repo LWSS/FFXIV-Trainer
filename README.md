@@ -10,7 +10,7 @@ Find a base pointer address to the X coordinate in memory and replace all of the
 # Todo
 Make an address scanner/signature. 
 
-Finish/Add some movement hacks.
+Add some more movement hacks.
 
 
 
