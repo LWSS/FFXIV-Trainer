@@ -12,7 +12,7 @@
 
 
 const static float PI = 3.141592f;
-const static float PI_HALF = 1.570796;
+const static float PI_HALF = 1.570796f;
 float fStepScale = 1.0f;
 
 bool IsMoveHack( ) /* Is player already using one movement hack? */
