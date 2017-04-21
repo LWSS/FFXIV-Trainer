@@ -2,6 +2,9 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
+#include <Windows.h>
+#include <TlHelp32.h>
+
 union
 {
 	struct
@@ -34,7 +37,7 @@ HANDLE hFF;
 // 1/12/17 -- { 0x013B5E40, 0xA0 };
 
 // static const unsigned long long startingAddr = 0x7FF7130CEB68L;
-static const unsigned long long startingAddr = 0x1933F30;
+unsigned long long posAddr; // Address of player coords
 static bool x64;
 
 static std::vector<unsigned long long> xBase;
@@ -55,7 +58,7 @@ LPVOID zCamAddr;
 
 struct vec3 {
 	float x, y, z, h;
-} playerPos_t, playerCamPos_t, noClipBuffer_t = { 0, 0, 0 }, noClipCurrant_t, flyBuffer_t = { 0, 0, 0 }, flyCurrent_t = { 0, 0, 0 };
+} playerPos_t, playerCamPos_t, noClipBuffer_t = { 0, 0, 0 }, noClipCurrent_t, flyBuffer_t = { 0, 0, 0 }, flyCurrent_t = { 0, 0, 0 };
 
 LPVOID TraceBasePointer(std::vector<unsigned long long> Base)
 {
@@ -71,24 +74,26 @@ LPVOID TraceBasePointer(std::vector<unsigned long long> Base)
 	return (LPVOID)lBaseAddr;
 }
 
-void SetupAddress()
+void SetupAddress(MODULEENTRY32 module)
 {
 	if( x64 ){
-		xBase = { startingAddr, 0xB0 };
-		yBase = { startingAddr, 0xB4 };
-		zBase = { startingAddr, 0xB8 };
-		xCamBase = { startingAddr, 0xFC, 0x40 };
-		yCamBase = { startingAddr, 0xFC, 0x44 };
-		zCamBase = { startingAddr, 0xFC, 0x48 };
-		hBase = { startingAddr, 0xC0 };
+		posAddr = ( unsigned long long )( module.modBaseAddr + 0x16BFB68 );
+		xBase = { posAddr, 0xB0 };
+		yBase = { posAddr, 0xB4 };
+		zBase = { posAddr, 0xB8 };
+		xCamBase = { posAddr, 0xFC, 0x40 };
+		yCamBase = { posAddr, 0xFC, 0x44 };
+		zCamBase = { posAddr, 0xFC, 0x48 };
+		hBase = { posAddr, 0xC0 };
 	} else {
-		xBase = { startingAddr, 0xA0 };
-		yBase = { startingAddr, 0xA4 };
-		zBase = { startingAddr, 0xA8 };
-	    xCamBase = { startingAddr, 0xEC, 0x30 };
-		yCamBase = { startingAddr, 0xEC, 0x34 };
-		zCamBase = { startingAddr, 0xEC, 0x38 };
-		hBase = { startingAddr, 0xB0 }; 
+		posAddr = ( unsigned long long )( module.modBaseAddr + 0x1083F30 );
+		xBase = { posAddr, 0xA0 };
+		yBase = { posAddr, 0xA4 };
+		zBase = { posAddr, 0xA8 };
+	    xCamBase = { posAddr, 0xEC, 0x30 };
+		yCamBase = { posAddr, 0xEC, 0x34 };
+		zCamBase = { posAddr, 0xEC, 0x38 };
+		hBase = { posAddr, 0xB0 }; 
 	}
 	xAddr = TraceBasePointer(xBase);
 	yAddr = TraceBasePointer(yBase);

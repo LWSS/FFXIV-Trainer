@@ -18,12 +18,18 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="WinApi.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Memory.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HackThreads.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WinApi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

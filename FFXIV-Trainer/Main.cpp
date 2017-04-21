@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip> // float fixed precision 
 #include <Windows.h>
 #include <atomic>
 #include <thread>
@@ -9,6 +10,7 @@
 
 #include "Memory.hpp"
 #include "HackThreads.hpp"
+#include "WinApi.h"
 
 
 const static float PI = 3.141592f;
@@ -64,9 +66,7 @@ void ReadCin(std::atomic<bool>& run)
 			} else {
 				if( !IsMoveHack() ){
 					std::cout<<"Noclip[ON] - "<< fStepScale <<std::endl;
-					noClipCurrant_t.x = playerPos_t.x; // Set Initial Values for Position Locking.
-					noClipCurrant_t.y = playerPos_t.y;
-					noClipCurrant_t.z = playerPos_t.z;
+					noClipCurrent_t = playerPos_t; // Set Initial Values for Position Locking.
 					moveHacks_t.status.bNoClip = true;
 					noClipThread = std::thread(MaintainNoClip);
 				} else {
@@ -82,9 +82,7 @@ void ReadCin(std::atomic<bool>& run)
 			else {
 				if( !IsMoveHack() ) {
 					std::cout << "GhostClip[ON] - " << fStepScale << std::endl;
-					noClipCurrant_t.x = playerPos_t.x; // Set Initial Values for Position Locking.
-					noClipCurrant_t.y = playerPos_t.y;
-					noClipCurrant_t.z = playerPos_t.z;
+					noClipCurrent_t = playerPos_t; // Set Initial Values for Position Locking.
 					moveHacks_t.status.bGhostClip = true;
 					ghostClipThread = std::thread(MaintainGhostClip);
 				} else {
@@ -116,9 +114,7 @@ void ReadCin(std::atomic<bool>& run)
 			} else {
 				if( !IsMoveHack() ){
 					std::cout<<"Fly[ON] - " << std::endl;
-					flyCurrent_t.x = playerPos_t.x; // Set Initial Values for Position Locking.
-					flyCurrent_t.y = playerPos_t.y;
-					flyCurrent_t.z = playerPos_t.z;
+					flyCurrent_t = playerPos_t; // Set Initial Values for Position Locking.
 					moveHacks_t.status.bFly = true;
 					flyThread = std::thread(MaintainFlight);
 				} else {
@@ -133,9 +129,7 @@ void ReadCin(std::atomic<bool>& run)
 			} else {
 				if( !IsMoveHack() ){
 					std::cout<<"GhostFly[ON]"<<std::endl;
-					flyCurrent_t.x = playerPos_t.x; // Set Initial Values for Position Locking.
-					flyCurrent_t.y = playerPos_t.y;
-					flyCurrent_t.z = playerPos_t.z;
+					flyCurrent_t = playerPos_t; // Set Initial Values for Position Locking.
 					moveHacks_t.status.bGhostFly = true;
 					ghostFlyThread = std::thread(MaintainGhostFlight);
 				} else {
@@ -154,24 +148,12 @@ void UpdatePlayerPos() /* Called in loop to Read in Player Coords */
 	ReadProcessMemory(hFF, hAddr, &playerPos_t.h, 4, NULL); // Read Radians In
 
 	ReadProcessMemory(hFF, xCamAddr, &playerCamPos_t.x, 4, NULL); // X - Camera
-	ReadProcessMemory(hFF, yCamAddr, &playerCamPos_t.y, 4, NULL); // X - Camera
-	ReadProcessMemory(hFF, zCamAddr, &playerCamPos_t.z, 4, NULL); // X - Camera
+	ReadProcessMemory(hFF, yCamAddr, &playerCamPos_t.y, 4, NULL); // Y - Camera
+	ReadProcessMemory(hFF, zCamAddr, &playerCamPos_t.z, 4, NULL); // Z - Camera
 }
 
 int main( )
 {
-	
-	const int directx = MessageBox( NULL, "Is DirectX 11 on?", "DirectX", MB_YESNO ); // TODO detect directx11 automatically 
-
-	switch( directx ) {
-	case IDYES:
-		x64 = true;
-		break;
-	case IDNO:
-		x64 = false;
-		break;
-	}
-	
 	std::atomic<bool> run(true);
 	std::thread cinThread( ReadCin, std::ref(run));
 
@@ -185,16 +167,33 @@ int main( )
 		return 0;
 	} 
 	std::cout<< "Found Final Fantasy (PID: " << ffPid << ")" <<std::endl;
-	DWORD PID;
-	GetWindowThreadProcessId( hWnd, &PID );
-	hFF = OpenProcess( PROCESS_ALL_ACCESS, false, PID );
-		
+	
+	MODULEENTRY32 ffModule;
+	ffModule = GetModule( ffPid, "ffxiv_dx11.exe" ); 
+	if( ffModule.th32ModuleID == 0 ) {
+		ffModule = GetModule( ffPid, "ffxiv.exe" ); // try 32 bit module 
+		if( ffModule.th32ModuleID == 0 ){
+			std::cout << "Couldn't find ffxiv Module" << std::endl;
+			std::cin.get();
+			return -1;
+		}
+		std::cout<< "DirectX 9 detected (x32)" << std::endl;
+		x64 = false;
+	}
+	std::cout << "DirectX 11 detected (x64)" << std::endl;
+	x64 = true; 
+
+	std::cout << "ffxiv Module Found: " << std::hex << (unsigned int)ffModule.modBaseAddr << std::endl;
+
+
+	hFF = OpenProcess( PROCESS_ALL_ACCESS, false, ffPid );
 	if ( !hFF ){
 		std::cout<< "Cannot Access Process Memory"<<std::endl;
 		std::cin.get();
 		return 0;
 	} 
-	SetupAddress();
+	
+	SetupAddress(ffModule);
 
 	while( run.load() ) {
 		if(  GetAsyncKeyState(VK_SPACE)  &&  bCommandMode == false && hOurWindow == GetForegroundWindow()  ){
@@ -208,7 +207,7 @@ int main( )
 			
 			UpdatePlayerPos();
 			if ( bShowPos ){
-				std::cout<< "*X: " << playerPos_t.x << "  Y: " << playerPos_t.y << "  Z: " << playerPos_t.z << "  Head: " << playerPos_t.h;
+				std::cout<< std::fixed << std::setprecision(3) << "*X: " << playerPos_t.x << "  Y: " << playerPos_t.y << "  Z: " << playerPos_t.z << "  Head: " << playerPos_t.h;
 				std::cout<< "\r" << std::flush;
 			}
 #pragma region NOCLIP_INPUT

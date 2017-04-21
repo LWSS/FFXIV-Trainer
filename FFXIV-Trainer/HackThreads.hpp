@@ -12,9 +12,9 @@ void MaintainNoClip()
 		mNoClip.lock();
 		if (noClipBuffer_t.x != 0 || noClipBuffer_t.y != 0 || noClipBuffer_t.z != 0) { /* Is there a Change to process? Noted by noClipBuffer */
 
-			noClipCurrant_t.x = noClipBuffer_t.x;
-			noClipCurrant_t.y = noClipBuffer_t.y;
-			noClipCurrant_t.z = noClipBuffer_t.z;
+			noClipCurrent_t.x = noClipBuffer_t.x;
+			noClipCurrent_t.y = noClipBuffer_t.y;
+			noClipCurrent_t.z = noClipBuffer_t.z;
 
 
 			WriteProcessMemory(hFF, xAddr, &noClipBuffer_t.x, 4, NULL);
@@ -30,9 +30,9 @@ void MaintainNoClip()
 			noClipBuffer_t.z = 0;
 		}
 		else { /* Else, just hover. */
-			WriteProcessMemory(hFF, xAddr, &noClipCurrant_t.x, 4, NULL);
-			WriteProcessMemory(hFF, yAddr, &noClipCurrant_t.y, 4, NULL);
-			WriteProcessMemory(hFF, zAddr, &noClipCurrant_t.z, 4, NULL);
+			WriteProcessMemory(hFF, xAddr, &noClipCurrent_t.x, 4, NULL);
+			WriteProcessMemory(hFF, yAddr, &noClipCurrent_t.y, 4, NULL);
+			WriteProcessMemory(hFF, zAddr, &noClipCurrent_t.z, 4, NULL);
 		}
 		mNoClip.unlock();
 		Sleep(25);
@@ -45,9 +45,9 @@ void MaintainGhostClip()
 		mNoClip.lock();
 		if (noClipBuffer_t.x != 0 || noClipBuffer_t.y != 0 || noClipBuffer_t.z != 0) { /* Is there a Change to process? Noted by noClipBuffer */
 
-			noClipCurrant_t.x = noClipBuffer_t.x;
-			noClipCurrant_t.y = noClipBuffer_t.y;
-			noClipCurrant_t.z = noClipBuffer_t.z;
+			noClipCurrent_t.x = noClipBuffer_t.x;
+			noClipCurrent_t.y = noClipBuffer_t.y;
+			noClipCurrent_t.z = noClipBuffer_t.z;
 
 
 			WriteProcessMemory(hFF, xAddr, &noClipBuffer_t.x, 4, NULL);
@@ -59,9 +59,9 @@ void MaintainGhostClip()
 			noClipBuffer_t.z = 0;
 		}
 		else { /* Else, just hover. */
-			WriteProcessMemory(hFF, xAddr, &noClipCurrant_t.x, 4, NULL);
-			WriteProcessMemory(hFF, yAddr, &noClipCurrant_t.y, 4, NULL);
-			WriteProcessMemory(hFF, zAddr, &noClipCurrant_t.z, 4, NULL);
+			WriteProcessMemory(hFF, xAddr, &noClipCurrent_t.x, 4, NULL);
+			WriteProcessMemory(hFF, yAddr, &noClipCurrent_t.y, 4, NULL);
+			WriteProcessMemory(hFF, zAddr, &noClipCurrent_t.z, 4, NULL);
 		}
 		mNoClip.unlock();
 		Sleep(25);
