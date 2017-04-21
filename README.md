@@ -5,10 +5,12 @@ For Windows only.
 
 
 # Setup 
-Find a base pointer address to the X coordinate in memory and replace all of the vectors in Memory.h with it :^)
+Compile with Visual Studio. Should work out of the box. 
+
+Need testers :^) 
 
 # Todo
-Make an address scanner/signature. 
+Start using address scanner/signature for offsets. 
 
 Add some more movement hacks.
 
