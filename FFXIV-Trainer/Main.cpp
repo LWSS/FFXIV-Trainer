@@ -179,9 +179,11 @@ int main( )
 		}
 		std::cout<< "DirectX 9 detected (x32)" << std::endl;
 		x64 = false;
+	} else {
+		std::cout << "DirectX 11 detected (x64)" << std::endl;
+		x64 = true;
 	}
-	std::cout << "DirectX 11 detected (x64)" << std::endl;
-	x64 = true; 
+	
 
 	std::cout << "ffxiv Module Found: " << std::hex << (unsigned int)ffModule.modBaseAddr << std::endl;
 
